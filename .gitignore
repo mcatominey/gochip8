@@ -1,0 +1,9 @@
+# Testing coverage report
+*.out
+
+# Binary
+gochip8
+gochip8.exe
+
+# Libraries
+*.dll
