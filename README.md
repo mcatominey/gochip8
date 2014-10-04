@@ -4,7 +4,7 @@ An emulator of the Chip 8 interpreted language in Go.
 
 Under MIT license.
 
-[![Build Status](https://drone.io/github.com/mcatominey/gochip8/status.png)](https://drone.io/github.com/mcatominey/gochip8/latest)
+[![Build Status](https://travis-ci.org/mcatominey/gochip8.svg?branch=master)](https://travis-ci.org/mcatominey/gochip8)
 [![Coverage Status](https://coveralls.io/repos/mcatominey/gochip8/badge.png)](https://coveralls.io/r/mcatominey/gochip8)
 
 **Currently no sound**
