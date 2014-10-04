@@ -17,8 +17,8 @@ func Test0x2nnn(t *testing.T) {
 	}
 
 	// Check pc was placed onto stack
-	// Since there is only one instruction pc should be at start address
-	if c.stack[c.sp] != programStartAddress {
+	// Since there is only one instruction pc should be at start address + 2
+	if c.stack[c.sp-1] != programStartAddress+2 {
 		t.Error("pc was not added to stack")
 	}
 }

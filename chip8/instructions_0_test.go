@@ -44,13 +44,13 @@ func Test0x00EE(t *testing.T) {
 	})
 
 	// Add address to stack
-	c.sp++
 	c.stack[c.sp] = stackAddressTest
+	c.sp++
 
 	c.Step()
 
 	// PC is incremented in Step for next instruction
-	if c.pc != stackAddressTest+2 {
+	if c.pc != stackAddressTest {
 		t.Errorf("Expected PC to be set to %#X, actually %#X", stackAddressTest, c.pc)
 	}
 }
