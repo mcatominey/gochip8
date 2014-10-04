@@ -22,9 +22,12 @@ A collection of games, understood to be in the public domain are in the ```games
 
 The Chip 8 has a hexidecimal keyboard which is bound to these keys:
 
-**1 2 3 4**</br>
-**Q W E R**</br>
-**A S D F**</br>
+**1 2 3 4**
+
+**Q W E R**
+
+**A S D F**
+
 **Z X C V**
 
 ## Building
