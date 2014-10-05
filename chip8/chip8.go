@@ -174,7 +174,7 @@ func (c *Chip8) Step() bool {
 	}
 
 	// Get the opcode from program memory
-	op := getOpcode(c.memory[c.pc], c.memory[c.pc+1])
+	op := GetOpcode(c.memory[c.pc], c.memory[c.pc+1])
 
 	c.pc += 2
 

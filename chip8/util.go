@@ -1,6 +1,6 @@
 package chip8
 
-func getOpcode(left, right byte) uint16 {
+func GetOpcode(left, right byte) uint16 {
 	l := uint16(left)
 	r := uint16(right)
 

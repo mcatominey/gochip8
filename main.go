@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/mcatominey/gochip8/chip8"
 	"github.com/veandco/go-sdl2/sdl"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -53,20 +53,22 @@ var (
 )
 
 func main() {
-	log.SetPrefix("[gochip8]")
 	flag.Parse()
 
 	romFile := flag.Arg(0)
 	if len(romFile) == 0 {
-		log.Fatalln("no rom file specified")
+		fmt.Println("no rom file specified")
+		os.Exit(1)
 	}
 
 	program := readProgram(romFile)
 
 	if *disassemble {
-		err := chip8.DisassembleProgram(program, ";", os.Stdout)
-		if err != nil {
-			log.Fatalln("error disassembling program:", err.Error())
+		for i := 0; i < len(program); i += 2 {
+			op := chip8.GetOpcode(program[i], program[i+1])
+			inst := chip8.DecodeOpcode(op)
+
+			fmt.Printf("%#x ; %s\n", op, inst.Description)
 		}
 	} else {
 		runROM(program)
@@ -75,7 +77,8 @@ func main() {
 
 func readProgram(filename string) []byte {
 	if program, err := ioutil.ReadFile(filename); err != nil {
-		log.Fatalln("error reading from rom file:", err.Error())
+		fmt.Println("error reading from rom file:", err.Error())
+		os.Exit(1)
 		return nil
 	} else {
 		return program

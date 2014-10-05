@@ -1,10 +1,5 @@
 package chip8
 
-import (
-	"fmt"
-	"io"
-)
-
 type Instruction struct {
 	// original Opcode that was decoded
 	Opcode uint16
@@ -25,17 +20,6 @@ var (
 		},
 	}
 )
-
-func DisassembleProgram(program []byte, delim string, w io.Writer) error {
-	for i := 0; i < len(program); i += 2 {
-		op := getOpcode(program[i], program[i+1])
-		inst := DecodeOpcode(op)
-
-		fmt.Fprintf(w, "%#x %s %s\n", op, delim, inst.Description)
-	}
-
-	return nil
-}
 
 func DecodeOpcode(op uint16) Instruction {
 	// First narrow down by first nibble
