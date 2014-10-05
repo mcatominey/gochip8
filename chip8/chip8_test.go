@@ -26,6 +26,36 @@ func TestIncorrectKeyValue(t *testing.T) {
 	c.PressKey(KeyF + 1)
 }
 
+func TestPCTooHigh(t *testing.T) {
+	c := New([]byte{})
+
+	// Set PC out of range
+	c.pc = MemorySize
+
+	defer func() {
+		if err := recover(); err == nil {
+			t.Error("Step did not panic as expected")
+		}
+	}()
+
+	c.Step()
+}
+
+func TestPCTooLow(t *testing.T) {
+	c := New([]byte{})
+
+	// Set PC out of range
+	c.pc = programStartAddress - 1
+
+	defer func() {
+		if err := recover(); err == nil {
+			t.Error("Step did not panic as expected")
+		}
+	}()
+
+	c.Step()
+}
+
 func TestWaitingForKey(t *testing.T) {
 	c := New([]byte{
 		0xF2, 0x0A, // Wait for key opcode, store key pressed in V2

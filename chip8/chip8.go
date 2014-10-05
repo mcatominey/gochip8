@@ -164,7 +164,7 @@ func (c *Chip8) DePressKey(key Key) {
 // returns true if an instruction was actually executed
 func (c *Chip8) Step() bool {
 	// Check if PC is in bounds
-	if c.pc < programStartAddress || c.pc > MemorySize {
+	if c.pc < programStartAddress || c.pc > MemorySize-1 {
 		panic("pc is at invalid address")
 	}
 
