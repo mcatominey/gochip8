@@ -1,6 +1,7 @@
 package chip8
 
 import (
+	"math/rand"
 	"testing"
 )
 
@@ -62,7 +63,18 @@ func Test0xFx1E(t *testing.T) {
 }
 
 func Test0xFx29(t *testing.T) {
-	t.Skip("Not implemented")
+	hex := byte(rand.Int31n(0xF))
+
+	c := New([]byte{
+		0xF5, 0x29, // Hex character in V5
+	})
+	c.v[0x5] = hex
+
+	c.Step()
+
+	if c.i != uint16(fontStartAddress+(hex*5)) {
+		t.Error("incorrect font memory address in I")
+	}
 }
 
 func Test0xFx33(t *testing.T) {
