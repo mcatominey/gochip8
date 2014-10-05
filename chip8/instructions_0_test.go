@@ -54,3 +54,16 @@ func Test0x00EE(t *testing.T) {
 		t.Errorf("Expected PC to be set to %#X, actually %#X", stackAddressTest, c.pc)
 	}
 }
+
+func Test0x0nnn(t *testing.T) {
+	c := New([]byte{
+		0x01, 0x11,
+	})
+
+	c.Step()
+
+	// Ensure PC did not Jump as this instruction is ignored
+	if c.pc != programStartAddress+2 {
+		t.Error("expected instruction to be ignored and have no effect")
+	}
+}
