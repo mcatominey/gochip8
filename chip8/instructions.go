@@ -380,7 +380,8 @@ func decodeOpcodeD(op uint16) Instruction {
 
 			// Set VF to 0
 			c.v[0xF] = 0
-			// Read sprite from memory
+
+			// Read sprite and XOR to display
 			var x, y uint16
 			for y = 0; y < op&0xF; y++ {
 				line := c.memory[c.i+y]

@@ -40,41 +40,26 @@ var (
 )
 
 type Chip8 struct {
-	// memory
-	// 0x000 - 0x050 => Fonts
-	// 0x051 - 0x1FF => Reserved (Not used)
-	// 0x200 - 0xFFF => Program and General memory
 	memory [MemorySize]byte
 
-	// Program Counter and Stack Pointer
-	pc, sp uint16
+	pc, sp uint16 // program counter and stack pointer
+	stack  [StackSize]uint16
 
-	// Stack
-	stack [StackSize]uint16
+	v [VRegisterCount]byte // V registers (including carry v[0xF])
+	i uint16               // I register, used for storing memory addresses, only lower 12 bits are used
 
-	// V Registers
-	v [VRegisterCount]byte
+	display [DisplayWidth][DisplayHeight]byte // display, 1 if pixel is on, 0 if not
 
-	// I Register (16 bits wide)
-	i uint16
-
-	// display, on or off
-	display [DisplayWidth][DisplayHeight]byte
-
+	// DrawFlag is true when the display has been updated
 	DrawFlag bool
 
-	// Keyboard, down = true
-	keys [KeyCount]bool
-	// true if waiting for a key
-	waitingForKey bool
-	// index of V register where value waiting key should be stored
-	// -1 while not waiting or not set
-	waitingKeyRegister int8
+	keys               [KeyCount]bool // keyboard pressed states, down = true
+	waitingForKey      bool           // execution should be paused until this is false
+	waitingKeyRegister int8           // index of V register where value waiting key should be stored
 
-	// Timers 60Hz counting down
-	sound, delay byte
+	sound, delay byte // timers, counting down at 60 hz
 
-	rand RandSource
+	rand RandSource // source of random byte used in an instruction
 }
 
 // New creates a new Chip 8, reading the program file from file at filename
