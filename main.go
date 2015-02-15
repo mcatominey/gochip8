@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mcatominey/gochip8/chip8"
-	"github.com/veandco/go-sdl2/sdl"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/pmcatominey/gochip8/chip8"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 // Config
@@ -22,7 +23,7 @@ var (
 	scaleFactor = flag.Int("scaling", 10, "scale factor to multiply Chip 8 resolution (64*32) by")
 
 	// Controls execution speed, useful since some roms play at mad speeds compared to others
-	stepsPerSecond = flag.Int64("sps", 500, "instructions to emulate per second")
+	cyclesPerLoop = flag.Int("cycles", 10, "steps to emulate per loop")
 
 	// Default key bindings
 	defaultKeyBindings = map[sdl.Keycode]chip8.Key{
@@ -48,8 +49,7 @@ var (
 		H: int32(*scaleFactor),
 	}
 
-	// Main loop control
-	running bool
+	exitChan = make(chan bool, 1) // true sent this channel to exit main loop
 )
 
 func main() {
@@ -62,15 +62,11 @@ func main() {
 	}
 
 	program := readProgram(romFile)
-
 	if *disassemble {
-		for i := 0; i < len(program); i += 2 {
-			op := chip8.GetOpcode(program[i], program[i+1])
-			inst := chip8.DecodeOpcode(op)
-
-			fmt.Printf("%#x ; %s\n", op, inst.Description)
-		}
+		fmt.Println("Disassembling ROM to stdout")
+		disassembleROM(program)
 	} else {
+		fmt.Println("Running ROM")
 		runROM(program)
 	}
 }
@@ -86,14 +82,24 @@ func readProgram(filename string) []byte {
 }
 
 func setupSDL() {
+	var (
+		w = *scaleFactor * chip8.DisplayWidth
+		h = *scaleFactor * chip8.DisplayHeight
+
+		romName = filepath.Base(flag.Arg(0))
+		err     error
+	)
+
 	sdl.Init(sdl.INIT_VIDEO | sdl.INIT_AUDIO)
+	window, err = sdl.CreateWindow("gochip8 - "+romName, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, w, h, 0)
+	if err != nil {
+		panic(err)
+	}
 
-	w := *scaleFactor * chip8.DisplayWidth
-	h := *scaleFactor * chip8.DisplayHeight
-
-	romName := filepath.Base(flag.Arg(0))
-	window = sdl.CreateWindow("gochip8 - "+romName, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, w, h, 0)
-	renderer = sdl.CreateRenderer(window, -1, 0)
+	renderer, err = sdl.CreateRenderer(window, -1, 0)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func cleanUpSDL() {
@@ -108,28 +114,25 @@ func runROM(rom []byte) {
 	// Lock goroutine to main thread
 	runtime.LockOSThread()
 
+	// Setup and ensure cleanup of SDL
 	setupSDL()
 	defer cleanUpSDL()
 
-	// Update timers at 60Hz
-	go func() {
-		c := time.Tick(16 * time.Millisecond)
-		for _ = range c {
-			c8.UpdateTimers()
-		}
-	}()
-
-	running = true
-	c := time.Tick(time.Millisecond * time.Duration(1000/(*stepsPerSecond)))
+	// Run main loop at 60Hz
+	c := time.Tick(time.Second / 60)
 	for _ = range c {
-		if !running {
-			break
+		select {
+		case <-exitChan:
+			return
+		default:
 		}
 
+		c8.UpdateTimers()
 		processInput()
 
-		// Run an instruction
-		c8.Step()
+		for i := 0; i < *cyclesPerLoop; i++ {
+			c8.Step()
+		}
 
 		// Draw if needed
 		if c8.DrawFlag {
@@ -139,15 +142,24 @@ func runROM(rom []byte) {
 	}
 }
 
-// processInput handles polls and handles SDL events
+func disassembleROM(rom []byte) {
+	for i := 0; i < len(rom); i += 2 {
+		op := chip8.GetOpcode(rom[i], rom[i+1])
+		inst := chip8.DecodeOpcode(op)
+
+		fmt.Printf("%#x ; %s\n", op, inst.Description)
+	}
+}
+
+// processInput polls and handles SDL events
 func processInput() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch e := event.(type) {
 		case *sdl.QuitEvent:
-			running = false
+			exitChan <- true
 		case *sdl.KeyDownEvent:
 			if e.Keysym.Sym == sdl.K_ESCAPE {
-				running = false
+				exitChan <- true
 			} else {
 				k, ok := keyBindings[e.Keysym.Sym]
 				if ok {
