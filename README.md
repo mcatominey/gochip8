@@ -16,7 +16,7 @@ Under MIT license.
 
 - ```-disassemble``` instead of running the rom, print an explanation of each opcode to stdout
 - ```-scaling 10``` factor to scale from original Chip 8 resolution (64x32), defaults to 10 for a window size of 640x320
-- ```-sps 500``` number of steps to attempt to emulate per second
+- ```-cycles 10``` number of steps to attempt to emulate per loop
 
 A collection of games, understood to be in the public domain are in the ```games``` directory.
 
