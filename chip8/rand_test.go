@@ -17,7 +17,7 @@ func TestRand(t *testing.T) {
 		}
 	}
 
-	t.Errorf("random byte generator returned same value %i times", iterations)
+	t.Errorf("random byte generator returned same value %d times", iterations)
 }
 
 // Same as above applies

@@ -50,7 +50,7 @@ type Chip8 struct {
 
 	display [DisplayWidth][DisplayHeight]byte // display, 1 if pixel is on, 0 if not
 
-	// DrawFlag is true when the display has been updated
+	// DrawFlag is true when the display has been updated and should be rendered
 	DrawFlag bool
 
 	keys               [KeyCount]bool // keyboard pressed states, down = true
@@ -115,6 +115,7 @@ func (c *Chip8) Reset() {
 	c.sound = 0
 }
 
+// LoadProgram loads program and font data into memory
 func (c *Chip8) LoadProgram(program []byte) {
 	// Load program into memory
 	for i := 0; i < len(program); i++ {
@@ -170,6 +171,13 @@ func (c *Chip8) Step() bool {
 	return true
 }
 
+// ShouldBuzz returns true if the sound timer is greater than 0, in
+// which case a continuous sound shoule be emitted until it returns
+// false
+func (c *Chip8) ShouldBuzz() bool {
+	return c.sound > 0
+}
+
 // UpdateTimers will decrement both the sound and delay timers given
 // that the Chip 8 is not currently waiting for a key press
 func (c *Chip8) UpdateTimers() {
@@ -186,6 +194,6 @@ func (c *Chip8) UpdateTimers() {
 	}
 }
 
-func (c *Chip8) GetDisplay() [DisplayWidth][DisplayHeight]byte {
+func (c *Chip8) Display() [DisplayWidth][DisplayHeight]byte {
 	return c.display
 }

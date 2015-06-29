@@ -1,16 +1,29 @@
 package main
 
+// typedef unsigned char Uint8;
+// void AudioCallback(void *userdata, Uint8 *stream, int len);
+import "C"
+
 import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"time"
+	"unsafe"
 
 	"github.com/pmcatominey/gochip8/chip8"
 	"github.com/veandco/go-sdl2/sdl"
+)
+
+const (
+	toneHz   = 440
+	sampleHz = 4800
+	dPhase   = 2 * math.Pi * toneHz / sampleHz
 )
 
 // Config
@@ -100,6 +113,16 @@ func setupSDL() {
 	if err != nil {
 		panic(err)
 	}
+
+	// audio spec
+	spec := &sdl.AudioSpec{
+		Freq:     sampleHz,
+		Format:   sdl.AUDIO_U8,
+		Channels: 2,
+		Samples:  sampleHz,
+		Callback: sdl.AudioCallback(C.AudioCallback),
+	}
+	sdl.OpenAudio(spec, nil)
 }
 
 func cleanUpSDL() {
@@ -132,6 +155,13 @@ func runROM(rom []byte) {
 
 		for i := 0; i < *cyclesPerLoop; i++ {
 			c8.Step()
+		}
+
+		// Sound
+		if c8.ShouldBuzz() {
+			sdl.PauseAudio(0)
+		} else {
+			sdl.PauseAudio(1)
 		}
 
 		// Draw if needed
@@ -175,8 +205,23 @@ func processInput() {
 	}
 }
 
+//export AudioCallback
+func AudioCallback(userdata unsafe.Pointer, stream *C.Uint8, length C.int) {
+	n := int(length)
+	hdr := reflect.SliceHeader{Data: uintptr(unsafe.Pointer(stream)), Len: n, Cap: n}
+	buf := *(*[]C.Uint8)(unsafe.Pointer(&hdr))
+
+	var phase float64
+	for i := 0; i < n; i += 2 {
+		phase += dPhase
+		sample := C.Uint8((math.Sin(phase) + 0.999999) * 128)
+		buf[i] = sample
+		buf[i+1] = sample
+	}
+}
+
 func draw() {
-	display := c8.GetDisplay()
+	display := c8.Display()
 	renderer.SetDrawColor(0, 0, 0, 1)
 	renderer.Clear()
 
