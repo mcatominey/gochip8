@@ -6,8 +6,6 @@ Under MIT license.
 
 [![Build Status](https://travis-ci.org/pmcatominey/gochip8.svg?branch=master)](https://travis-ci.org/pmcatominey/gochip8)
 
-**Currently no sound**
-
 ## Usage
 
 ```gochip8 <flags> path/to/rom```
