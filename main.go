@@ -159,9 +159,9 @@ func runROM(rom []byte) {
 
 		// Sound
 		if c8.ShouldBuzz() {
-			sdl.PauseAudio(0)
+			sdl.PauseAudio(false)
 		} else {
-			sdl.PauseAudio(1)
+			sdl.PauseAudio(true)
 		}
 
 		// Draw if needed
